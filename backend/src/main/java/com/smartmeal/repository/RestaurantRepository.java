@@ -33,29 +33,12 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
            "(:search IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(r.cuisine) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
            "(:cuisine IS NULL OR r.cuisine = :cuisine) AND " +
            "(:minRating IS NULL OR r.rating >= :minRating) AND " +
-           "(:maxPrice IS NULL OR r.minOrder <= :maxPrice) AND " +
-           "(:vegOnly IS NULL OR r.isVegOnly = :vegOnly)")
+           "(:maxPrice IS NULL OR r.minOrder <= :maxPrice)")
     Page<Restaurant> findByFilters(@Param("location") String location,
                                     @Param("search") String search,
                                     @Param("cuisine") String cuisine,
                                     @Param("minRating") Double minRating,
                                     @Param("maxPrice") Double maxPrice,
-                                    @Param("vegOnly") Boolean vegOnly,
-                                    Pageable pageable);
-    
-    @Query("SELECT r FROM Restaurant r WHERE r.isActive = true AND " +
-           "(:location IS NULL OR r.location = :location) AND " +
-           "(:search IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(r.cuisine) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
-           "(:cuisine IS NULL OR r.cuisine = :cuisine) AND " +
-           "(:minRating IS NULL OR r.rating >= :minRating) AND " +
-           "(:maxPrice IS NULL OR r.minOrder <= :maxPrice) AND " +
-           "(:vegOnly IS NULL OR r.isVegOnly = :vegOnly)")
-    List<Restaurant> findByFilters(@Param("location") String location,
-                                    @Param("search") String search,
-                                    @Param("cuisine") String cuisine,
-                                    @Param("minRating") Double minRating,
-                                    @Param("maxPrice") Double maxPrice,
-                                    @Param("vegOnly") Boolean vegOnly,
                                     Pageable pageable);
     
     @Query("SELECT r FROM Restaurant r WHERE r.isActive = true AND " +

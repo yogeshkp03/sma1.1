@@ -91,6 +91,20 @@ class SmaProvider extends ChangeNotifier {
   }
 
   Future<void> savePreferences(SmaPreference preference) async {
+    await savePreferencesWithTimes(
+      preference,
+      breakfastTime: '8:00 AM',
+      lunchTime: '1:00 PM',
+      dinnerTime: '8:00 PM',
+    );
+  }
+
+  Future<void> savePreferencesWithTimes(
+    SmaPreference preference, {
+    required String breakfastTime,
+    required String lunchTime,
+    required String dinnerTime,
+  }) async {
     if (_userId == null) return;
 
     _isLoading = true;
@@ -109,7 +123,7 @@ class SmaProvider extends ChangeNotifier {
         userId: _userId!.toString(),
         isEnabled: preference.isEnabled,
         mealType: MealType.lunch,
-        scheduledTime: '1:00 PM',
+        scheduledTime: lunchTime,
         includeWeekends: preference.includeWeekends,
         dietType: preference.dietType,
         cuisinePreferences: preference.cuisinePreferences,
@@ -125,24 +139,24 @@ class SmaProvider extends ChangeNotifier {
 
       final breakfastPref = basePreference.copyWith(
         mealType: MealType.breakfast,
-        scheduledTime: '08:00',
+        scheduledTime: breakfastTime,
       );
       final lunchPref = basePreference.copyWith(
         mealType: MealType.lunch,
-        scheduledTime: '13:00',
+        scheduledTime: lunchTime,
       );
       final dinnerPref = basePreference.copyWith(
         mealType: MealType.dinner,
-        scheduledTime: '20:00',
+        scheduledTime: dinnerTime,
       );
 
-      debugPrint('Creating breakfast preference...');
+      debugPrint('Creating breakfast preference with time: $breakfastTime...');
       final savedBreakfast =
           await _repository.createPreference(_userId!, breakfastPref);
-      debugPrint('Creating lunch preference...');
+      debugPrint('Creating lunch preference with time: $lunchTime...');
       final savedLunch =
           await _repository.createPreference(_userId!, lunchPref);
-      debugPrint('Creating dinner preference...');
+      debugPrint('Creating dinner preference with time: $dinnerTime...');
       final savedDinner =
           await _repository.createPreference(_userId!, dinnerPref);
 
@@ -155,7 +169,6 @@ class SmaProvider extends ChangeNotifier {
     }
 
     _isLoading = false;
-    notifyListeners();
     notifyListeners();
   }
 

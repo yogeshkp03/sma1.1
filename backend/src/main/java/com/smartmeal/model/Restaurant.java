@@ -1,5 +1,6 @@
 package com.smartmeal.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -49,6 +50,7 @@ public class Restaurant {
     
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonIgnoreProperties({"restaurant", "hibernateLazyInitializer", "handler"})
     private List<MenuItem> menuItems = new ArrayList<>();
     
     @PrePersist

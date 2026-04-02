@@ -30,15 +30,15 @@ public class AnalyticsService {
                 .average()
                 .orElse(0);
         
-        return Map.of(
-            "totalRecommendations", totalRecommendations,
-            "mealTypeDistribution", mealTypeCounts,
-            "averageCalories", Math.round(avgCalories),
-            "mostActiveMealType", mealTypeCounts.entrySet().stream()
-                    .max(Map.Entry.comparingByValue())
-                    .map(Map.Entry::getKey)
-                    .orElse("None")
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalRecommendations", totalRecommendations);
+        result.put("mealTypeDistribution", mealTypeCounts);
+        result.put("averageCalories", Math.round(avgCalories));
+        result.put("mostActiveMealType", mealTypeCounts.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("None"));
+        return result;
     }
 
     public Map<String, Object> getWeeklyNutritionSummary(Long userId) {
@@ -55,27 +55,34 @@ public class AnalyticsService {
         
         Map<String, Integer> caloriesByDay = new HashMap<>();
         history.forEach(h -> {
-            String day = h.getRecommendedAt().toLocalDate().toString();
-            caloriesByDay.merge(day, h.getCalories() != null ? h.getCalories() : 0, Integer::sum);
+            if (h.getRecommendedAt() != null) {
+                String day = h.getRecommendedAt().toLocalDate().toString();
+                caloriesByDay.merge(day, h.getCalories() != null ? h.getCalories() : 0, Integer::sum);
+            }
         });
         
-        return Map.of(
-            "totalMeals", totalMeals,
-            "totalCalories", totalCalories,
-            "averageCaloriesPerDay", totalMeals > 0 ? totalCalories / 7 : 0,
-            "caloriesByDay", caloriesByDay
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalMeals", totalMeals);
+        result.put("totalCalories", totalCalories);
+        result.put("averageCaloriesPerDay", totalMeals > 0 ? totalCalories / 7 : 0);
+        result.put("caloriesByDay", caloriesByDay);
+        return result;
     }
 
     public List<Map<String, Object>> getPopularRecommendations() {
         List<RecommendationHistory> allHistory = historyRepository.findAll();
         
         return allHistory.stream()
-                .collect(Collectors.groupingBy(h -> h.getMenuItemName(), Collectors.counting()))
+                .collect(Collectors.groupingBy(h -> h.getMenuItemName() != null ? h.getMenuItemName() : "Unknown", Collectors.counting()))
                 .entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
                 .limit(10)
-                .map(e -> Map.of("itemName", e.getKey(), "orderCount", e.getValue()))
+                .map(e -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("itemName", e.getKey());
+                    item.put("orderCount", e.getValue());
+                    return item;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -86,11 +93,11 @@ public class AnalyticsService {
                 .filter(h -> h.getRestaurantName() != null)
                 .count();
         
-        return Map.of(
-            "totalMeals", history.size(),
-            "vegetarianMeals", vegCount,
-            "nonVegetarianMeals", history.size() - vegCount,
-            "dietPreference", vegCount > (history.size() / 2) ? "Vegetarian" : "Non-Vegetarian"
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalMeals", history.size());
+        result.put("vegetarianMeals", vegCount);
+        result.put("nonVegetarianMeals", history.size() - vegCount);
+        result.put("dietPreference", vegCount > (history.size() / 2) ? "Vegetarian" : "Non-Vegetarian");
+        return result;
     }
 }

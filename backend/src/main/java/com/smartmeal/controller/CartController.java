@@ -45,7 +45,7 @@ public class CartController {
             @RequestParam Integer quantity) {
         CartItemResponse item = cartService.updateCartItem(userId, itemId, quantity);
         if (item == null) {
-            return ResponseEntity.ok(ApiResponse.success("Item removed from cart", null));
+            return ResponseEntity.ok(new ApiResponse<CartItemResponse>(true, "Item removed from cart", null));
         }
         return ResponseEntity.ok(ApiResponse.success(item));
     }
@@ -55,13 +55,13 @@ public class CartController {
             @PathVariable Long userId,
             @PathVariable Long itemId) {
         cartService.removeFromCart(userId, itemId);
-        return ResponseEntity.ok(ApiResponse.success("Item removed from cart", null));
+        return ResponseEntity.ok(new ApiResponse<Void>(true, "Item removed from cart", null));
     }
     
     @DeleteMapping("/{userId}/clear")
     public ResponseEntity<ApiResponse<Void>> clearCart(@PathVariable Long userId) {
         cartService.clearCart(userId);
-        return ResponseEntity.ok(ApiResponse.success("Cart cleared", null));
+        return ResponseEntity.ok(new ApiResponse<Void>(true, "Cart cleared", null));
     }
     
     @PostMapping("/{userId}/checkout")

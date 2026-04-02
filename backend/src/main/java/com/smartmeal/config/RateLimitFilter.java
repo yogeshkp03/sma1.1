@@ -7,29 +7,21 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Duration;
 
-@Configuration
-public class RateLimitFilter {
+@Component
+@Order(1)
+public class RateLimitFilter implements Filter {
 
     @Value("${rate-limit.requests-per-minute:60}")
     private int requestsPerMinute;
 
-    @Bean
-    public FilterRegistrationBean<RateLimitFilter> rateLimitFilter() {
-        FilterRegistrationBean<RateLimitFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new RateLimitFilter());
-        registrationBean.addUrlPatterns("/api/*");
-        registrationBean.setOrder(1);
-        return registrationBean;
-    }
-
-    private static final ThreadLocal<Bucket> buckets = new ThreadLocal<>();
+    private final ThreadLocal<Bucket> buckets = new ThreadLocal<>();
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

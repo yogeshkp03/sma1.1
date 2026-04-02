@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/sma_preference_model.dart';
 import '../../../data/models/menu_item_model.dart';
+import '../../../data/models/restaurant_model.dart';
 import '../../../providers/sma_provider.dart';
 import '../../../providers/cart_provider.dart';
 import '../cart/cart_screen.dart';
@@ -229,11 +230,29 @@ class _SmaHomeScreenState extends State<SmaHomeScreen> {
 
   void _addToCart(BuildContext context, MenuItem item) {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
+
+    // Create a temporary restaurant if none exists
+    Restaurant restaurantToAdd;
+    if (cartProvider.restaurant != null) {
+      restaurantToAdd = cartProvider.restaurant!;
+    } else {
+      restaurantToAdd = Restaurant(
+        id: item.restaurantId ?? 0,
+        name: item.restaurantName ?? 'Restaurant',
+        rating: 4.0,
+        deliveryTimeMin: 30,
+        deliveryTimeMax: 45,
+        deliveryFee: 40,
+        minOrder: 100,
+      );
+    }
+
     cartProvider.addItem(
       menuItem: item,
-      restaurant: cartProvider.restaurant ?? _createTempRestaurant(item),
+      restaurant: restaurantToAdd,
       quantity: 1,
     );
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${item.name} added to cart!'),
@@ -247,10 +266,6 @@ class _SmaHomeScreenState extends State<SmaHomeScreen> {
       ),
     );
     setState(() => _recommendations = []);
-  }
-
-  dynamic _createTempRestaurant(MenuItem item) {
-    return null;
   }
 
   void _showRecommendationHistory(BuildContext context) {
@@ -615,7 +630,7 @@ class _ScheduleCard extends StatelessWidget {
               runSpacing: 8,
               children: preferencesList.map((pref) {
                 return _MealChip(
-                    mealType: pref.mealType, time: pref.scheduledTime);
+                    mealType: pref.mealType, time: pref.formattedTime);
               }).toList(),
             ),
           ],
@@ -761,6 +776,8 @@ class _PreferencesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasDietType = preferences.dietType != DietType.none;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -778,14 +795,23 @@ class _PreferencesCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                if (preferences.dietType != DietType.none)
-                  _PreferenceChip(
-                      label: preferences.dietType.displayName,
-                      icon: Icons.restaurant),
+                _PreferenceChip(
+                    label: hasDietType
+                        ? preferences.dietType.displayName
+                        : 'No diet preference set',
+                    icon: hasDietType
+                        ? Icons.restaurant
+                        : Icons.restaurant_outlined,
+                    color: hasDietType ? AppColors.primary : Colors.grey),
                 if (preferences.budgetLimit != null)
                   _PreferenceChip(
                       label: 'Budget: ₹${preferences.budgetLimit}',
                       icon: Icons.currency_rupee),
+                if (preferences.cuisinePreferences.isNotEmpty)
+                  _PreferenceChip(
+                      label:
+                          '${preferences.cuisinePreferences.length} cuisines',
+                      icon: Icons.local_dining),
               ],
             ),
           ],
@@ -798,20 +824,24 @@ class _PreferencesCard extends StatelessWidget {
 class _PreferenceChip extends StatelessWidget {
   final String label;
   final IconData icon;
-  const _PreferenceChip({required this.label, required this.icon});
+  final Color color;
+  const _PreferenceChip(
+      {required this.label, required this.icon, this.color = Colors.grey});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-          color: Colors.grey[100], borderRadius: BorderRadius.circular(16)),
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.3))),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Colors.grey[600]),
+          Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
-          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[700])),
+          Text(label, style: TextStyle(fontSize: 12, color: color)),
         ],
       ),
     );
@@ -966,10 +996,9 @@ class _SmaSetupScreenState extends State<SmaSetupScreen> {
   }
 
   String _formatTime(TimeOfDay t) {
-    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final h = t.hour.toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
-    final p = t.period == DayPeriod.am ? 'AM' : 'PM';
-    return '$h:$m $p';
+    return '$h:$m:00';
   }
 
   Widget _buildSlider(String label, double value, double min, double max,
@@ -992,27 +1021,22 @@ class _SmaSetupScreenState extends State<SmaSetupScreen> {
       );
 
   void _savePreferences() async {
-    final prefs = context.read<SmaProvider>();
+    final smaProvider = context.read<SmaProvider>();
 
-    MealType? selectedMealType;
-    String? selectedTime;
-    for (var entry in _mealTimes.entries) {
-      selectedMealType = entry.key;
-      selectedTime = _formatTime(entry.value);
-      break;
-    }
-
-    if (selectedMealType == null) {
-      selectedMealType = MealType.lunch;
-      selectedTime = '1:00 PM';
-    }
+    // Get user's selected times for each meal type
+    final breakfastTime = _formatTime(
+        _mealTimes[MealType.breakfast] ?? const TimeOfDay(hour: 8, minute: 0));
+    final lunchTime = _formatTime(
+        _mealTimes[MealType.lunch] ?? const TimeOfDay(hour: 13, minute: 0));
+    final dinnerTime = _formatTime(
+        _mealTimes[MealType.dinner] ?? const TimeOfDay(hour: 20, minute: 0));
 
     final preference = SmaPreference(
-      id: prefs.preferences?.id,
-      userId: prefs.preferences?.userId ?? '',
+      id: smaProvider.preferences?.id,
+      userId: smaProvider.preferences?.userId ?? '',
       isEnabled: _smaEnabled,
-      mealType: selectedMealType,
-      scheduledTime: selectedTime ?? '1:00 PM',
+      mealType: MealType.lunch, // Primary meal type (doesn't matter for saving)
+      scheduledTime: lunchTime,
       includeWeekends: _includeWeekends,
       dietType: _dietType,
       cuisinePreferences: [],
@@ -1026,9 +1050,19 @@ class _SmaSetupScreenState extends State<SmaSetupScreen> {
       isActive: _smaEnabled,
     );
 
-    await prefs.savePreferences(preference);
+    // Pass the meal times to the provider
+    await smaProvider.savePreferencesWithTimes(
+      preference,
+      breakfastTime: breakfastTime,
+      lunchTime: lunchTime,
+      dinnerTime: dinnerTime,
+    );
+
+    // Reload preferences from backend to ensure consistency
+    await smaProvider.loadPreferences();
+
     if (mounted) {
-      Navigator.pop(context);
+      Navigator.pop(context); // Go back to dashboard
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Preferences saved!'), backgroundColor: Colors.green));
     }

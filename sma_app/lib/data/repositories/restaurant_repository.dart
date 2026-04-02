@@ -24,8 +24,8 @@ class RestaurantRepository {
         queryParameters: queryParams,
       );
 
-      if (response.data['success'] == true) {
-        return (response.data['data'] as List)
+      if (response['success'] == true) {
+        return (response['data'] as List)
             .map((json) => Restaurant.fromJson(json))
             .toList();
       }
@@ -39,8 +39,8 @@ class RestaurantRepository {
     try {
       final response = await _apiService.get('${ApiConstants.restaurants}/$id');
 
-      if (response.data['success'] == true) {
-        return Restaurant.fromJson(response.data['data']);
+      if (response['success'] == true) {
+        return Restaurant.fromJson(response['data']);
       }
       return null;
     } catch (e) {
@@ -52,8 +52,8 @@ class RestaurantRepository {
     try {
       final response = await _apiService.get(ApiConstants.restaurantLocations);
 
-      if (response.data['success'] == true) {
-        return List<String>.from(response.data['data']);
+      if (response['success'] == true) {
+        return List<String>.from(response['data']);
       }
       return [];
     } catch (e) {
@@ -67,8 +67,8 @@ class RestaurantRepository {
         '${ApiConstants.menu}/restaurant/$restaurantId',
       );
 
-      if (response.data['success'] == true) {
-        return (response.data['data'] as List)
+      if (response['success'] == true) {
+        return (response['data'] as List)
             .map((json) => MenuItem.fromJson(json))
             .toList();
       }
@@ -82,8 +82,8 @@ class RestaurantRepository {
     try {
       final response = await _apiService.get('${ApiConstants.menu}/$id');
 
-      if (response.data['success'] == true) {
-        return MenuItem.fromJson(response.data['data']);
+      if (response['success'] == true) {
+        return MenuItem.fromJson(response['data']);
       }
       return null;
     } catch (e) {

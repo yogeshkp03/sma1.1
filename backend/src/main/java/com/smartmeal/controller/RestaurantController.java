@@ -28,30 +28,22 @@ public class RestaurantController {
             @RequestParam(required = false) String cuisine,
             @RequestParam(required = false) Double minRating,
             @RequestParam(required = false) Double maxPrice,
-            @RequestParam(required = false) Boolean vegOnly,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         
-        if (page >= 0 && size > 0) {
-            Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-            
-            Page<RestaurantResponse> pagedResult = restaurantService.getRestaurantsFiltered(
-                location, search, cuisine, minRating, maxPrice, vegOnly, pageable);
-            
-            return ResponseEntity.ok(ApiResponse.success(pagedResult.getContent(), 
-                "page", pagedResult.getNumber(),
-                "size", pagedResult.getSize(),
-                "totalElements", pagedResult.getTotalElements(),
-                "totalPages", pagedResult.getTotalPages()));
-        }
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
         
-        List<RestaurantResponse> restaurants = restaurantService.getRestaurantsFiltered(
-            location, search, cuisine, minRating, maxPrice, vegOnly, null);
+        Page<RestaurantResponse> pagedResult = restaurantService.getRestaurantsFiltered(
+            location, search, cuisine, minRating, maxPrice, pageable);
         
-        return ResponseEntity.ok(ApiResponse.success(restaurants));
+        return ResponseEntity.ok(ApiResponse.success(pagedResult.getContent(), 
+            "page", (Object) pagedResult.getNumber(),
+            "size", (Object) pagedResult.getSize(),
+            "totalElements", (Object) pagedResult.getTotalElements(),
+            "totalPages", (Object) pagedResult.getTotalPages()));
     }
     
     @GetMapping("/{id}")

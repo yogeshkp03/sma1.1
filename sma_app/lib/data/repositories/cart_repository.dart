@@ -12,10 +12,10 @@ class CartRepository {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      if (response.data['success'] == true) {
-        return Cart.fromJson(response.data['data']);
+      if (response['success'] == true) {
+        return Cart.fromJson(response['data']);
       }
-      throw response.data['message'] ?? 'Failed to fetch cart';
+      throw response['message'] ?? 'Failed to fetch cart';
     } catch (e) {
       throw 'Failed to fetch cart: $e';
     }
@@ -38,10 +38,10 @@ class CartRepository {
         },
       );
 
-      if (response.data['success'] == true) {
-        return CartItem.fromJson(response.data['data']);
+      if (response['success'] == true) {
+        return CartItem.fromJson(response['data']);
       }
-      throw response.data['message'] ?? 'Failed to add to cart';
+      throw response['message'] ?? 'Failed to add to cart';
     } catch (e) {
       throw 'Failed to add to cart: $e';
     }
@@ -54,11 +54,11 @@ class CartRepository {
         data: {'quantity': quantity},
       );
 
-      if (response.data['success'] == true) {
-        if (response.data['data'] == null) return null;
-        return CartItem.fromJson(response.data['data']);
+      if (response['success'] == true) {
+        if (response['data'] == null) return null;
+        return CartItem.fromJson(response['data']);
       }
-      throw response.data['message'] ?? 'Failed to update cart';
+      throw response['message'] ?? 'Failed to update cart';
     } catch (e) {
       throw 'Failed to update cart: $e';
     }
@@ -70,8 +70,8 @@ class CartRepository {
         '${ApiConstants.cart}/$userId/items/$itemId',
       );
 
-      if (response.data['success'] != true) {
-        throw response.data['message'] ?? 'Failed to remove from cart';
+      if (response['success'] != true) {
+        throw response['message'] ?? 'Failed to remove from cart';
       }
     } catch (e) {
       throw 'Failed to remove from cart: $e';
@@ -84,8 +84,8 @@ class CartRepository {
         '${ApiConstants.cart}/$userId/clear',
       );
 
-      if (response.data['success'] != true) {
-        throw response.data['message'] ?? 'Failed to clear cart';
+      if (response['success'] != true) {
+        throw response['message'] ?? 'Failed to clear cart';
       }
     } catch (e) {
       throw 'Failed to clear cart: $e';

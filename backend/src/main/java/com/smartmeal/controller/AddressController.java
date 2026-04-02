@@ -47,6 +47,6 @@ public class AddressController {
     public ResponseEntity<ApiResponse<Void>> deleteAddress(@PathVariable Long id, 
                                                            @PathVariable Long userId) {
         addressService.deleteAddress(id, userId);
-        return ResponseEntity.ok(ApiResponse.success("Address deleted successfully", null));
+        return ResponseEntity.ok(new ApiResponse<Void>(true, "Address deleted successfully", null));
     }
 }

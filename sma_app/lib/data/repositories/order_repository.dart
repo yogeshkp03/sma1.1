@@ -20,8 +20,8 @@ class OrderRepository {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      if (response.data['success'] == true) {
-        final List<dynamic> data = response.data['data'] ?? [];
+      if (response['success'] == true) {
+        final List<dynamic> data = response['data'] ?? [];
         return data.map((json) => OrderModel.fromJson(json)).toList();
       }
       return [];
@@ -38,8 +38,8 @@ class OrderRepository {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      if (response.data['success'] == true) {
-        return OrderModel.fromJson(response.data['data']);
+      if (response['success'] == true) {
+        return OrderModel.fromJson(response['data']);
       }
       throw Exception('Failed to load order details');
     } catch (e) {
@@ -53,10 +53,10 @@ class OrderRepository {
         '${ApiConstants.orders}/$orderId/cancel',
       );
 
-      if (response.data['success'] == true) {
-        return OrderModel.fromJson(response.data['data']);
+      if (response['success'] == true) {
+        return OrderModel.fromJson(response['data']);
       }
-      throw Exception(response.data['message'] ?? 'Failed to cancel order');
+      throw Exception(response['message'] ?? 'Failed to cancel order');
     } catch (e) {
       throw Exception('Failed to cancel order: $e');
     }
@@ -70,8 +70,8 @@ class OrderRepository {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      if (response.data['success'] == true) {
-        final List<dynamic> data = response.data['data'] ?? [];
+      if (response['success'] == true) {
+        final List<dynamic> data = response['data'] ?? [];
         return data.map((json) => OrderModel.fromJson(json)).toList();
       }
       return [];

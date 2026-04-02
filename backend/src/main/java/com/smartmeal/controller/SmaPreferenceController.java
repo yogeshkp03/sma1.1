@@ -67,7 +67,7 @@ public class SmaPreferenceController {
             @RequestParam boolean active) {
         smaPreferenceService.togglePreference(userId, id, active);
         String message = active ? "Preference activated" : "Preference paused";
-        return ResponseEntity.ok(ApiResponse.success(message, null));
+        return ResponseEntity.ok(new ApiResponse<Void>(true, message, null));
     }
     
     @DeleteMapping("/{id}/user/{userId}")
@@ -75,6 +75,6 @@ public class SmaPreferenceController {
             @PathVariable Long id, 
             @PathVariable Long userId) {
         smaPreferenceService.deletePreference(userId, id);
-        return ResponseEntity.ok(ApiResponse.success("Preference deleted successfully", null));
+        return ResponseEntity.ok(new ApiResponse<Void>(true, "Preference deleted successfully", null));
     }
 }

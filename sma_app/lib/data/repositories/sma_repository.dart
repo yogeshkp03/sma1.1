@@ -13,16 +13,16 @@ class SmaRepository {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      debugPrint('getPreferences response: ${response.data}');
+      debugPrint('getPreferences response: $response');
 
-      if (response.data['success'] == true) {
-        final data = response.data['data'];
+      if (response['success'] == true) {
+        final data = response['data'];
         if (data != null && data is List) {
           return data.map((json) => SmaPreference.fromJson(json)).toList();
         }
       }
-      if (response.data['message'] != null) {
-        debugPrint('getPreferences error: ${response.data['message']}');
+      if (response['message'] != null) {
+        debugPrint('getPreferences error: ${response['message']}');
       }
       return [];
     } catch (e) {
@@ -38,16 +38,16 @@ class SmaRepository {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      debugPrint('getActivePreferences response: ${response.data}');
+      debugPrint('getActivePreferences response: $response');
 
-      if (response.data['success'] == true) {
-        final data = response.data['data'];
+      if (response['success'] == true) {
+        final data = response['data'];
         if (data != null && data is List) {
           return data.map((json) => SmaPreference.fromJson(json)).toList();
         }
       }
-      if (response.data['message'] != null) {
-        debugPrint('getActivePreferences error: ${response.data['message']}');
+      if (response['message'] != null) {
+        debugPrint('getActivePreferences error: ${response['message']}');
       }
       return [];
     } catch (e) {
@@ -68,16 +68,15 @@ class SmaRepository {
         data: preference.toJson(),
       );
 
-      debugPrint('createPreference response: ${response.data}');
+      debugPrint('createPreference response: $response');
 
-      if (response.data['success'] == true) {
-        final data = response.data['data'];
+      if (response['success'] == true) {
+        final data = response['data'];
         if (data != null) {
           return SmaPreference.fromJson(data);
         }
       }
-      final errorMsg =
-          response.data['message'] ?? 'Failed to create preference';
+      final errorMsg = response['message'] ?? 'Failed to create preference';
       debugPrint('createPreference error: $errorMsg');
       throw errorMsg;
     } catch (e) {
@@ -97,15 +96,15 @@ class SmaRepository {
         data: preference.toJson(),
       );
 
-      debugPrint('updatePreference response: ${response.data}');
+      debugPrint('updatePreference response: $response');
 
-      if (response.data['success'] == true) {
-        final data = response.data['data'];
+      if (response['success'] == true) {
+        final data = response['data'];
         if (data != null) {
           return SmaPreference.fromJson(data);
         }
       }
-      throw response.data['message'] ?? 'Failed to update preference';
+      throw response['message'] ?? 'Failed to update preference';
     } catch (e) {
       throw 'Failed to update SMA preference: $e';
     }
@@ -121,10 +120,10 @@ class SmaRepository {
         '${ApiConstants.smaPreferences}/$preferenceId/user/$userId/toggle?active=$active',
       );
 
-      debugPrint('togglePreference response: ${response.data}');
+      debugPrint('togglePreference response: $response');
 
-      if (response.data['success'] != true) {
-        throw response.data['message'] ?? 'Failed to toggle preference';
+      if (response['success'] != true) {
+        throw response['message'] ?? 'Failed to toggle preference';
       }
     } catch (e) {
       throw 'Failed to toggle SMA preference: $e';
@@ -137,10 +136,10 @@ class SmaRepository {
         '${ApiConstants.smaPreferences}/$preferenceId/user/$userId',
       );
 
-      debugPrint('deletePreference response: ${response.data}');
+      debugPrint('deletePreference response: $response');
 
-      if (response.data['success'] != true) {
-        throw response.data['message'] ?? 'Failed to delete preference';
+      if (response['success'] != true) {
+        throw response['message'] ?? 'Failed to delete preference';
       }
     } catch (e) {
       throw 'Failed to delete SMA preference: $e';

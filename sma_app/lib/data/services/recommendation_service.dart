@@ -38,10 +38,10 @@ class RecommendationService {
             headers: {'X-User-Id': userId.toString()},
           );
 
-          debugPrint('Recommendation $i response: ${response.data}');
+          debugPrint('Recommendation $i response: $response');
 
-          if (response.data['success'] == true) {
-            final data = response.data['data'];
+          if (response['success'] == true) {
+            final data = response['data'];
             if (data != null && data['menuItem'] != null) {
               final item = MenuItem.fromJson(data['menuItem']);
               if (!recommendations.any((r) => r.id == item.id)) {
@@ -49,8 +49,8 @@ class RecommendationService {
               }
             }
           }
-          if (response.data['message'] != null) {
-            debugPrint('Backend message: ${response.data['message']}');
+          if (response['message'] != null) {
+            debugPrint('Backend message: ${response['message']}');
           }
         } catch (e) {
           debugPrint('Error getting recommendation $i: $e');
@@ -83,8 +83,8 @@ class RecommendationService {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      if (response.data['success'] == true) {
-        final List<dynamic> data = response.data['data'];
+      if (response['success'] == true) {
+        final List<dynamic> data = response['data'];
         return data
             .map((json) => RecommendationHistory.fromJson(json))
             .toList();
@@ -103,8 +103,8 @@ class RecommendationService {
         headers: {'X-User-Id': userId.toString()},
       );
 
-      if (response.data['success'] == true) {
-        return response.data['data']['isEnabled'] ?? false;
+      if (response['success'] == true) {
+        return response['data']['isEnabled'] ?? false;
       }
       return false;
     } catch (e) {

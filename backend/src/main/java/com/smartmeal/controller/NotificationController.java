@@ -32,7 +32,7 @@ public class NotificationController {
         user.setFcmToken(request.getToken());
         userRepository.save(user);
 
-        return ResponseEntity.ok(ApiResponse.success("FCM token registered successfully", null));
+        return ResponseEntity.ok(new ApiResponse<Void>(true, "FCM token registered successfully", null));
     }
 
     @PostMapping("/update-preferences")
@@ -48,7 +48,7 @@ public class NotificationController {
         user.setNotificationsEnabled(request.getEnabled());
         userRepository.save(user);
 
-        return ResponseEntity.ok(ApiResponse.success("Preferences updated successfully", null));
+        return ResponseEntity.ok(new ApiResponse<Void>(true, "Preferences updated successfully", null));
     }
 
     @GetMapping("/status")

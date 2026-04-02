@@ -211,7 +211,6 @@ public class GeminiService {
             }
         }
         
-        saveRecommendationHistory(null, best, mealType);
         return best;
     }
 
@@ -268,9 +267,7 @@ public class GeminiService {
             filtered = items;
         }
         
-        MenuItem selected = filtered.get(new Random().nextInt(filtered.size()));
-        saveRecommendationHistory(null, selected, mealType);
-        return selected;
+        return filtered.get(new Random().nextInt(filtered.size()));
     }
 
     private void saveRecommendationHistory(Long userId, MenuItem item, MealType mealType) {

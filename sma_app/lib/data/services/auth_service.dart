@@ -20,9 +20,9 @@ class AuthService {
         },
       );
 
-      if (response.data['success'] == true) {
+      if (response['success'] == true) {
         AuthResponse authResponse = AuthResponse.fromJson(
-          response.data['data'],
+          response['data'],
         );
         await _apiService.setToken(authResponse.token);
 
@@ -35,7 +35,7 @@ class AuthService {
 
         return authResponse;
       } else {
-        throw response.data['message'] ?? 'Login failed';
+        throw response['message'] ?? 'Login failed';
       }
     } catch (e) {
       throw 'Login failed: $e';
@@ -65,12 +65,11 @@ class AuthService {
         data: data,
       );
 
-      debugPrint('Response status: ${response.statusCode}');
-      debugPrint('Response data: ${response.data}');
+      debugPrint('Response: $response');
 
-      if (response.data['success'] == true) {
+      if (response['success'] == true) {
         AuthResponse authResponse = AuthResponse.fromJson(
-          response.data['data'],
+          response['data'],
         );
         await _apiService.setToken(authResponse.token);
 
@@ -83,7 +82,7 @@ class AuthService {
 
         return authResponse;
       } else {
-        throw response.data['message'] ?? 'Registration failed';
+        throw response['message'] ?? 'Registration failed';
       }
     } catch (e) {
       debugPrint('Register error: $e');

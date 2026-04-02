@@ -1,5 +1,6 @@
 package com.smartmeal.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.smartmeal.model.enums.DietType;
 import com.smartmeal.model.enums.MacroLevel;
 import jakarta.persistence.*;
@@ -21,6 +22,7 @@ public class MenuItem {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
+    @JsonIgnoreProperties({"menuItems", "hibernateLazyInitializer", "handler"})
     private Restaurant restaurant;
     
     @Column(nullable = false)

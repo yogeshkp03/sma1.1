@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../data/models/user_model.dart';
 import '../data/services/auth_service.dart';
+import '../data/services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final ApiService _apiService = ApiService();
 
   AppUser? _user;
   int? _userId;
@@ -21,7 +23,20 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _userId = await _authService.getSavedUserId();
+      final userId = await _authService.getSavedUserId();
+      final email = await _authService.getSavedUserEmail();
+      final name = await _authService.getSavedUserName();
+
+      if (userId != null) {
+        _userId = userId;
+        _user = AppUser(
+          id: userId,
+          email: email ?? '',
+          fullName: name,
+        );
+        await _apiService.loadToken();
+      }
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {

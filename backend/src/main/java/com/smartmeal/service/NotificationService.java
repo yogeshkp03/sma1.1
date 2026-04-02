@@ -2,7 +2,6 @@ package com.smartmeal.service;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,9 +20,9 @@ public class NotificationService {
 
         try {
             Message message = Message.builder()
-                    .token(userFcmToken)
-                    .notification(Notification.builder()
-                            .setTitle("🍽️ Time for " + mealType + "!")
+                    .setToken(userFcmToken)
+                    .setNotification(com.google.firebase.messaging.Notification.builder()
+                            .setTitle("Time for " + mealType + "!")
                             .setBody(itemName + " from " + restaurantName + " has been added to your cart")
                             .build())
                     .putData("type", "meal_recommendation")
@@ -48,34 +47,28 @@ public class NotificationService {
         }
 
         try {
-            Message.Builder messageBuilder = Message.builder()
-                    .token(userFcmToken)
-                    .putData("type", "order_status")
-                    .putData("orderId", orderId)
-                    .putData("status", status);
-
             String title;
             String body;
 
             switch (status.toUpperCase()) {
                 case "CONFIRMED":
-                    title = "✅ Order Confirmed";
+                    title = "Order Confirmed";
                     body = "Your order #" + orderId + " has been confirmed";
                     break;
                 case "PREPARING":
-                    title = "👨‍🍳 Preparing Your Order";
+                    title = "Preparing Your Order";
                     body = "Your order is being prepared";
                     break;
                 case "OUT_FOR_DELIVERY":
-                    title = "🚴 Out for Delivery";
+                    title = "Out for Delivery";
                     body = "Your order is on its way";
                     break;
                 case "DELIVERED":
-                    title = "✅ Order Delivered";
+                    title = "Order Delivered";
                     body = "Your order has been delivered. Enjoy!";
                     break;
                 case "CANCELLED":
-                    title = "❌ Order Cancelled";
+                    title = "Order Cancelled";
                     body = "Your order #" + orderId + " has been cancelled";
                     break;
                 default:
@@ -83,12 +76,18 @@ public class NotificationService {
                     body = message != null ? message : "Your order status has been updated";
             }
 
-            messageBuilder.notification(Notification.builder()
-                    .setTitle(title)
-                    .setBody(body)
-                    .build());
+            Message messageToSend = Message.builder()
+                    .setToken(userFcmToken)
+                    .setNotification(com.google.firebase.messaging.Notification.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build())
+                    .putData("type", "order_status")
+                    .putData("orderId", orderId)
+                    .putData("status", status)
+                    .build();
 
-            String response = FirebaseMessaging.getInstance().send(messageBuilder.build());
+            String response = FirebaseMessaging.getInstance().send(messageToSend);
             logger.info("Successfully sent order status notification to user {}: {}", userId, response);
         } catch (Exception e) {
             logger.error("Failed to send order status notification to user {}: {}", userId, e.getMessage());
@@ -104,9 +103,9 @@ public class NotificationService {
 
         try {
             Message message = Message.builder()
-                    .token(userFcmToken)
-                    .notification(Notification.builder()
-                            .setTitle("⏰ " + mealType + " Time!")
+                    .setToken(userFcmToken)
+                    .setNotification(com.google.firebase.messaging.Notification.builder()
+                            .setTitle(mealType + " Time!")
                             .setBody("Your scheduled meal will be auto-added in 1 hour at " + scheduledTime)
                             .build())
                     .putData("type", "sma_reminder")
@@ -129,8 +128,8 @@ public class NotificationService {
 
         try {
             Message.Builder messageBuilder = Message.builder()
-                    .token(token)
-                    .notification(Notification.builder()
+                    .setToken(token)
+                    .setNotification(com.google.firebase.messaging.Notification.builder()
                             .setTitle(title)
                             .setBody(body)
                             .build());

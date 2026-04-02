@@ -29,11 +29,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         return ResponseEntity.badRequest()
-                .body(ApiResponse.<Map<String, String>>builder()
-                        .success(false)
-                        .message("Validation failed")
-                        .data(errors)
-                        .build());
+                .body(new ApiResponse<>(false, "Validation failed", errors));
     }
     
     @ExceptionHandler(Exception.class)

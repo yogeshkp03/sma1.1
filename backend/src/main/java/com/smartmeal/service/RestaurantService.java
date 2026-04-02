@@ -84,19 +84,9 @@ public class RestaurantService {
     }
     
     public Page<RestaurantResponse> getRestaurantsFiltered(String location, String search, 
-            String cuisine, Double minRating, Double maxPrice, Boolean vegOnly, Pageable pageable) {
-        return restaurantRepository.findByFilters(location, search, cuisine, minRating, maxPrice, vegOnly, pageable)
+            String cuisine, Double minRating, Double maxPrice, Pageable pageable) {
+        return restaurantRepository.findByFilters(location, search, cuisine, minRating, maxPrice, pageable)
                 .map(this::mapToResponse);
-    }
-    
-    public List<RestaurantResponse> getRestaurantsFiltered(String location, String search, 
-            String cuisine, Double minRating, Double maxPrice, Boolean vegOnly, Pageable pageable) {
-        if (pageable != null) {
-            return getRestaurantsFiltered(location, search, cuisine, minRating, maxPrice, vegOnly, pageable).getContent();
-        }
-        
-        List<Restaurant> restaurants = restaurantRepository.findByFilters(location, search, cuisine, minRating, maxPrice, vegOnly, null);
-        return restaurants.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
     
     @Transactional
@@ -118,7 +108,7 @@ public class RestaurantService {
                 .address(restaurant.getAddress())
                 .cuisine(restaurant.getCuisine())
                 .isActive(restaurant.getIsActive())
-                .menuItemCount((long) restaurant.getMenuItems().size())
+                .menuItemCount(restaurant.getMenuItems() != null ? (long) restaurant.getMenuItems().size() : 0)
                 .build();
     }
 }
