@@ -5,6 +5,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../data/models/restaurant_model.dart';
 import '../../../providers/restaurant_provider.dart';
+import '../../../data/services/connectivity_service.dart';
+import '../../widgets/image_placeholder.dart';
 import '../restaurant/restaurant_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -86,6 +88,27 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          Consumer<ConnectivityService>(
+            builder: (context, connectivity, _) {
+              if (connectivity.isOnline) return const SizedBox.shrink();
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                color: Colors.orange,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.cloud_off, color: Colors.white, size: 16),
+                    SizedBox(width: 8),
+                    Text(
+                      'Offline Mode - Showing cached data',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -296,16 +319,15 @@ class _RestaurantCard extends StatelessWidget {
             Container(
               height: 150,
               width: double.infinity,
-              color: AppColors.secondary.withValues(alpha: 0.2),
-              child: restaurant.imageUrl != null
-                  ? Image.network(
-                      restaurant.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholder();
-                      },
-                    )
-                  : _buildPlaceholder(),
+              child: CachedImage(
+                url: restaurant.imageUrl,
+                width: double.infinity,
+                height: 150,
+                placeholderIcon: Icons.restaurant,
+                backgroundColor: AppColors.secondary,
+                borderRadius: BorderRadius.zero,
+                fit: BoxFit.cover,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(12),

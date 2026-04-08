@@ -6,6 +6,7 @@ import '../../../data/models/menu_item_model.dart';
 import '../../../data/models/restaurant_model.dart';
 import '../../../providers/sma_provider.dart';
 import '../../../providers/cart_provider.dart';
+import '../../widgets/image_placeholder.dart';
 import '../cart/cart_screen.dart';
 
 class SmaHomeScreen extends StatefulWidget {
@@ -182,19 +183,24 @@ class _SmaHomeScreenState extends State<SmaHomeScreen> {
           _ScheduleCard(preferencesList: allPrefs),
           const SizedBox(height: 16),
           _NutritionGoalsCard(preferences: firstPref),
-          const SizedBox(height: 16),
-          _PreferencesCard(preferences: firstPref),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const SmaSetupScreen())),
-            icon: const Icon(Icons.edit),
-            label: const Text('Edit Preferences'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
+          Consumer<SmaProvider>(
+            builder: (context, smaProvider, _) {
+              final hasPreferences = smaProvider.preferencesList.isNotEmpty &&
+                  smaProvider.preferencesList.any((p) => p.id != null);
+              return ElevatedButton.icon(
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const SmaSetupScreen())),
+                icon: Icon(hasPreferences ? Icons.edit : Icons.add),
+                label: Text(
+                    hasPreferences ? 'Edit Preferences' : 'Set Preferences'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -443,24 +449,13 @@ class _GetSuggestionsCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              ClipRRect(
+                              CachedImage(
+                                url: recommendation.imageUrl,
+                                width: 60,
+                                height: 60,
+                                placeholderIcon: Icons.restaurant,
                                 borderRadius: BorderRadius.circular(8),
-                                child: recommendation.imageUrl != null
-                                    ? Image.network(recommendation.imageUrl!,
-                                        width: 60,
-                                        height: 60,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Container(
-                                            width: 60,
-                                            height: 60,
-                                            color: Colors.grey[200],
-                                            child:
-                                                const Icon(Icons.restaurant)))
-                                    : Container(
-                                        width: 60,
-                                        height: 60,
-                                        color: Colors.grey[200],
-                                        child: const Icon(Icons.restaurant)),
+                                fit: BoxFit.cover,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -770,84 +765,6 @@ class _NutritionItem extends StatelessWidget {
   }
 }
 
-class _PreferencesCard extends StatelessWidget {
-  final SmaPreference preferences;
-  const _PreferencesCard({required this.preferences});
-
-  @override
-  Widget build(BuildContext context) {
-    final hasDietType = preferences.dietType != DietType.none;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(children: [
-              Icon(Icons.tune, color: AppColors.primary),
-              SizedBox(width: 8),
-              Text('Dietary Preferences',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
-            ]),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _PreferenceChip(
-                    label: hasDietType
-                        ? preferences.dietType.displayName
-                        : 'No diet preference set',
-                    icon: hasDietType
-                        ? Icons.restaurant
-                        : Icons.restaurant_outlined,
-                    color: hasDietType ? AppColors.primary : Colors.grey),
-                if (preferences.budgetLimit != null)
-                  _PreferenceChip(
-                      label: 'Budget: ₹${preferences.budgetLimit}',
-                      icon: Icons.currency_rupee),
-                if (preferences.cuisinePreferences.isNotEmpty)
-                  _PreferenceChip(
-                      label:
-                          '${preferences.cuisinePreferences.length} cuisines',
-                      icon: Icons.local_dining),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PreferenceChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
-  const _PreferenceChip(
-      {required this.label, required this.icon, this.color = Colors.grey});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.3))),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
-          Text(label, style: TextStyle(fontSize: 12, color: color)),
-        ],
-      ),
-    );
-  }
-}
-
 class SmaSetupScreen extends StatefulWidget {
   const SmaSetupScreen({super.key});
   @override
@@ -873,7 +790,10 @@ class _SmaSetupScreenState extends State<SmaSetupScreen> {
   @override
   void initState() {
     super.initState();
-    final prefs = context.read<SmaProvider>().preferences;
+    final smaProvider = context.read<SmaProvider>();
+    final prefsList = smaProvider.preferencesList;
+    final prefs = smaProvider.preferences;
+
     if (prefs != null) {
       setState(() {
         _smaEnabled = prefs.isEnabled;
@@ -884,7 +804,11 @@ class _SmaSetupScreenState extends State<SmaSetupScreen> {
         _maxFats = prefs.maxFats;
         _dietType = prefs.dietType;
         _budgetLimit = prefs.budgetLimit;
-        _mealTimes[prefs.mealType] = _parseTime(prefs.scheduledTime);
+
+        // Load meal times from all saved preferences
+        for (final p in prefsList) {
+          _mealTimes[p.mealType] = _parseTime(p.scheduledTime);
+        }
       });
     }
   }
@@ -1058,13 +982,24 @@ class _SmaSetupScreenState extends State<SmaSetupScreen> {
       dinnerTime: dinnerTime,
     );
 
-    // Reload preferences from backend to ensure consistency
-    await smaProvider.loadPreferences();
-
     if (mounted) {
-      Navigator.pop(context); // Go back to dashboard
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Preferences saved!'), backgroundColor: Colors.green));
+      if (smaProvider.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(smaProvider.error!),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4)));
+        smaProvider.clearError();
+      } else {
+        // Reload preferences from backend to ensure consistency
+        // Force refresh to bypass cache
+        await smaProvider.loadPreferences(forceRefresh: true);
+        if (context.mounted) {
+          Navigator.pop(context); // Go back to dashboard
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Preferences saved successfully!'),
+              backgroundColor: Colors.green));
+        }
+      }
     }
   }
 }

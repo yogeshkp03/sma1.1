@@ -11,7 +11,6 @@ com\smartmeal\model\CartItem.class
 com\smartmeal\controller\MenuItemController.class
 com\smartmeal\dto\request\CartItemRequest.class
 com\smartmeal\dto\response\CartResponse.class
-com\smartmeal\service\GeminiService.class
 com\smartmeal\config\RequestLoggingInterceptor.class
 com\smartmeal\repository\SmaPreferenceRepository.class
 com\smartmeal\dto\response\UserResponse$UserResponseBuilder.class
@@ -19,7 +18,6 @@ com\smartmeal\model\RecommendationHistory.class
 com\smartmeal\model\Order.class
 com\smartmeal\dto\request\AuthRequest.class
 com\smartmeal\model\enums\DietType.class
-com\smartmeal\service\GeminiService$1.class
 com\smartmeal\service\SmaPreferenceService.class
 com\smartmeal\controller\CartController.class
 com\smartmeal\controller\OrderController.class
@@ -41,6 +39,7 @@ com\smartmeal\model\RecommendationHistory$RecommendationHistoryBuilder.class
 com\smartmeal\model\SmaPreference$SmaPreferenceBuilder.class
 com\smartmeal\service\RestaurantService.class
 com\smartmeal\dto\request\RegisterRequest.class
+com\smartmeal\service\LocalRecommendationService.class
 com\smartmeal\dto\response\CartItemResponse.class
 com\smartmeal\model\enums\MealType.class
 com\smartmeal\dto\request\LoginRequest.class

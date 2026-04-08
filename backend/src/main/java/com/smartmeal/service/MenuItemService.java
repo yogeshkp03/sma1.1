@@ -73,18 +73,18 @@ public class MenuItemService {
     }
     
     public List<MenuItemResponse> findByFilters(DietType dietType, Integer minCalories, 
-                                                  Integer maxCalories, BigDecimal maxPrice, 
-                                                  BigDecimal minProtein) {
-        return menuItemRepository.findByFilters(dietType, minCalories, maxCalories, maxPrice, minProtein)
+                                                  Integer maxCalories, BigDecimal maxCarbs, BigDecimal maxFat,
+                                                  BigDecimal maxPrice, BigDecimal minProtein) {
+        return menuItemRepository.findByFilters(dietType, minCalories, maxCalories, maxCarbs, maxFat, maxPrice, minProtein)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
     
     public Page<MenuItemResponse> findByFiltersPaginated(String location, DietType dietType, 
-            Integer minCalories, Integer maxCalories, BigDecimal maxPrice, 
-            BigDecimal minProtein, Pageable pageable) {
-        return menuItemRepository.findByFilters(location, dietType, minCalories, maxCalories, maxPrice, minProtein, pageable)
+            Integer minCalories, Integer maxCalories, BigDecimal maxCarbs, BigDecimal maxFat,
+            BigDecimal maxPrice, BigDecimal minProtein, Pageable pageable) {
+        return menuItemRepository.findByFilters(location, dietType, minCalories, maxCalories, maxCarbs, maxFat, maxPrice, minProtein, pageable)
                 .map(this::mapToResponse);
     }
     

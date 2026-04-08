@@ -7,10 +7,14 @@ import 'providers/restaurant_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/sma_provider.dart';
 import 'providers/navigation_provider.dart';
+import 'data/services/connectivity_service.dart';
 import 'presentation/screens/auth/splash_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  ConnectivityService.instance.initialize();
+
   runApp(const SmaApp());
 }
 
@@ -27,6 +31,7 @@ class SmaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RestaurantProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => SmaProvider()),
+        ChangeNotifierProvider.value(value: ConnectivityService.instance),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

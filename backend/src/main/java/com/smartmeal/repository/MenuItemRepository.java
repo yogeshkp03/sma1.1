@@ -37,11 +37,15 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
            "(:dietType IS NULL OR m.dietType = :dietType) AND " +
            "(:minCalories IS NULL OR m.calories >= :minCalories) AND " +
            "(:maxCalories IS NULL OR m.calories <= :maxCalories) AND " +
+           "(:maxCarbs IS NULL OR m.carbsGrams <= :maxCarbs) AND " +
+           "(:maxFat IS NULL OR m.fatGrams <= :maxFat) AND " +
            "(:maxPrice IS NULL OR m.price <= :maxPrice) AND " +
            "(:minProtein IS NULL OR m.proteinGrams >= :minProtein)")
     List<MenuItem> findByFilters(@Param("dietType") DietType dietType,
                                    @Param("minCalories") Integer minCalories,
                                    @Param("maxCalories") Integer maxCalories,
+                                   @Param("maxCarbs") BigDecimal maxCarbs,
+                                   @Param("maxFat") BigDecimal maxFat,
                                    @Param("maxPrice") BigDecimal maxPrice,
                                    @Param("minProtein") BigDecimal minProtein);
     
@@ -50,12 +54,16 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
            "(:dietType IS NULL OR m.dietType = :dietType) AND " +
            "(:minCalories IS NULL OR m.calories >= :minCalories) AND " +
            "(:maxCalories IS NULL OR m.calories <= :maxCalories) AND " +
+           "(:maxCarbs IS NULL OR m.carbsGrams <= :maxCarbs) AND " +
+           "(:maxFat IS NULL OR m.fatGrams <= :maxFat) AND " +
            "(:maxPrice IS NULL OR m.price <= :maxPrice) AND " +
            "(:minProtein IS NULL OR m.proteinGrams >= :minProtein)")
     Page<MenuItem> findByFilters(@Param("location") String location,
                                    @Param("dietType") DietType dietType,
                                    @Param("minCalories") Integer minCalories,
                                    @Param("maxCalories") Integer maxCalories,
+                                   @Param("maxCarbs") BigDecimal maxCarbs,
+                                   @Param("maxFat") BigDecimal maxFat,
                                    @Param("maxPrice") BigDecimal maxPrice,
                                    @Param("minProtein") BigDecimal minProtein,
                                    Pageable pageable);

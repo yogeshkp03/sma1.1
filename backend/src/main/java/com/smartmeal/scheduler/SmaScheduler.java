@@ -3,7 +3,7 @@ package com.smartmeal.scheduler;
 import com.smartmeal.model.*;
 import com.smartmeal.model.enums.MealType;
 import com.smartmeal.repository.*;
-import com.smartmeal.service.GeminiService;
+import com.smartmeal.service.LocalRecommendationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ public class SmaScheduler {
     private final SmaPreferenceRepository preferenceRepository;
     private final CartItemRepository cartItemRepository;
     private final MenuItemRepository menuItemRepository;
-    private final GeminiService geminiService;
+    private final LocalRecommendationService recommendationService;
 
     private static final int BUFFER_MINUTES = 60;
 
@@ -27,12 +27,12 @@ public class SmaScheduler {
                        SmaPreferenceRepository preferenceRepository,
                        CartItemRepository cartItemRepository,
                        MenuItemRepository menuItemRepository,
-                       GeminiService geminiService) {
+                       LocalRecommendationService recommendationService) {
         this.userRepository = userRepository;
         this.preferenceRepository = preferenceRepository;
         this.cartItemRepository = cartItemRepository;
         this.menuItemRepository = menuItemRepository;
-        this.geminiService = geminiService;
+        this.recommendationService = recommendationService;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -80,7 +80,7 @@ public class SmaScheduler {
             }
 
             MealType mealType = pref.getMealType();
-            MenuItem recommendation = geminiService.getAiRecommendation(user.getId(), mealType);
+            MenuItem recommendation = recommendationService.getRecommendation(user.getId(), mealType);
             
             if (recommendation != null) {
                 addToCart(user, recommendation);

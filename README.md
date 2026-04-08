@@ -30,12 +30,22 @@ sma/
 └── README.md               # This file
 ```
 
+## Features
+
+- Smart Meal Autopilot (SMA) - Automated meal recommendations
+- **Local Recommendation Engine** - No external API required
+- Diet-based filtering (Vegetarian, Non-Veg, Eggetarian, Vegan)
+- Budget and nutritional constraint enforcement
+- User history influence with recency decay
+- Restaurant affinity tracking
+- Scheduled meal automation
+
 ## Quick Start
 
 ### Backend
 ```bash
 cd backend
-# Configure PostgreSQL in application.yaml
+# Uses H2 in-memory database by default
 mvn spring-boot:run
 ```
 

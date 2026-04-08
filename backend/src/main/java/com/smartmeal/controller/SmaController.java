@@ -2,7 +2,7 @@ package com.smartmeal.controller;
 
 import com.smartmeal.dto.response.ApiResponse;
 import com.smartmeal.model.enums.MealType;
-import com.smartmeal.service.GeminiService;
+import com.smartmeal.service.LocalRecommendationService;
 import com.smartmeal.service.SmaPreferenceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +14,11 @@ import java.util.Map;
 public class SmaController {
 
     private final SmaPreferenceService smaPreferenceService;
-    private final GeminiService geminiService;
+    private final LocalRecommendationService recommendationService;
 
-    public SmaController(SmaPreferenceService smaPreferenceService, GeminiService geminiService) {
+    public SmaController(SmaPreferenceService smaPreferenceService, LocalRecommendationService recommendationService) {
         this.smaPreferenceService = smaPreferenceService;
-        this.geminiService = geminiService;
+        this.recommendationService = recommendationService;
     }
 
     @PostMapping("/skip-meal")

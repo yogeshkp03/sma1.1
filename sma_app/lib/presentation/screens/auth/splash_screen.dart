@@ -24,7 +24,17 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     final authProvider = context.read<AuthProvider>();
-    await authProvider.checkAuthStatus();
+
+    try {
+      await authProvider.checkAuthStatus().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('Auth check timed out');
+        },
+      );
+    } catch (e) {
+      debugPrint('Auth check error: $e');
+    }
 
     if (!mounted) return;
 

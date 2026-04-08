@@ -28,7 +28,7 @@ class SmaProvider extends ChangeNotifier {
     loadPreferences();
   }
 
-  Future<void> loadPreferences() async {
+  Future<void> loadPreferences({bool forceRefresh = false}) async {
     if (_userId == null) {
       final prefs = await SharedPreferences.getInstance();
       _userId = prefs.getInt('user_id');
@@ -41,7 +41,8 @@ class SmaProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await _repository.getActivePreferences(_userId!);
+      final prefs = await _repository.getActivePreferences(_userId!,
+          forceRefresh: forceRefresh);
 
       if (prefs.isNotEmpty) {
         _preferencesList = prefs;
@@ -50,8 +51,40 @@ class SmaProvider extends ChangeNotifier {
           SmaPreference(
             userId: _userId!.toString(),
             isEnabled: true,
+            mealType: MealType.breakfast,
+            scheduledTime: '08:00:00',
+            includeWeekends: false,
+            dietType: DietType.none,
+            cuisinePreferences: [],
+            maxCalories: 600,
+            minProtein: 30,
+            maxCarbs: 80,
+            maxFats: 30,
+            minFiber: 10,
+            maxFiber: 50,
+            isActive: true,
+          ),
+          SmaPreference(
+            userId: _userId!.toString(),
+            isEnabled: true,
             mealType: MealType.lunch,
-            scheduledTime: '1:00 PM',
+            scheduledTime: '13:00:00',
+            includeWeekends: false,
+            dietType: DietType.none,
+            cuisinePreferences: [],
+            maxCalories: 600,
+            minProtein: 30,
+            maxCarbs: 80,
+            maxFats: 30,
+            minFiber: 10,
+            maxFiber: 50,
+            isActive: true,
+          ),
+          SmaPreference(
+            userId: _userId!.toString(),
+            isEnabled: true,
+            mealType: MealType.dinner,
+            scheduledTime: '20:00:00',
             includeWeekends: false,
             dietType: DietType.none,
             cuisinePreferences: [],
@@ -79,8 +112,49 @@ class SmaProvider extends ChangeNotifier {
         SmaPreference(
           userId: _userId!.toString(),
           isEnabled: true,
+          mealType: MealType.breakfast,
+          scheduledTime: '08:00:00',
+          includeWeekends: false,
+          dietType: DietType.none,
+          cuisinePreferences: [],
+          maxCalories: 600,
+          minProtein: 30,
+          maxCarbs: 80,
+          maxFats: 30,
+          minFiber: 10,
+          maxFiber: 50,
+          isActive: true,
+        ),
+        SmaPreference(
+          userId: _userId!.toString(),
+          isEnabled: true,
           mealType: MealType.lunch,
-          scheduledTime: '1:00 PM',
+          scheduledTime: '13:00:00',
+          includeWeekends: false,
+          dietType: DietType.none,
+          cuisinePreferences: [],
+          maxCalories: 600,
+          minProtein: 30,
+          maxCarbs: 80,
+          maxFats: 30,
+          minFiber: 10,
+          maxFiber: 50,
+          isActive: true,
+        ),
+        SmaPreference(
+          userId: _userId!.toString(),
+          isEnabled: true,
+          mealType: MealType.dinner,
+          scheduledTime: '20:00:00',
+          includeWeekends: false,
+          dietType: DietType.none,
+          cuisinePreferences: [],
+          maxCalories: 600,
+          minProtein: 30,
+          maxCarbs: 80,
+          maxFats: 30,
+          minFiber: 10,
+          maxFiber: 50,
           isActive: true,
         ),
       ];
@@ -105,7 +179,12 @@ class SmaProvider extends ChangeNotifier {
     required String lunchTime,
     required String dinnerTime,
   }) async {
-    if (_userId == null) return;
+    if (_userId == null || _userId! <= 0) {
+      _error = 'Session expired. Please log in to save preferences.';
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
 
     _isLoading = true;
     _error = null;
@@ -153,9 +232,11 @@ class SmaProvider extends ChangeNotifier {
       debugPrint('Creating breakfast preference with time: $breakfastTime...');
       final savedBreakfast =
           await _repository.createPreference(_userId!, breakfastPref);
+
       debugPrint('Creating lunch preference with time: $lunchTime...');
       final savedLunch =
           await _repository.createPreference(_userId!, lunchPref);
+
       debugPrint('Creating dinner preference with time: $dinnerTime...');
       final savedDinner =
           await _repository.createPreference(_userId!, dinnerPref);
@@ -165,7 +246,17 @@ class SmaProvider extends ChangeNotifier {
           'All preferences saved. List size: ${_preferencesList.length}');
     } catch (e) {
       debugPrint('Error saving preferences: $e');
-      _error = e.toString();
+      String errorMessage = e.toString();
+
+      if (errorMessage.contains('Unable to connect') ||
+          errorMessage.contains('TimeoutException') ||
+          errorMessage.contains('SocketException') ||
+          errorMessage.contains('Connection')) {
+        _error =
+            'Cannot connect to server. Please check your internet connection.';
+      } else {
+        _error = errorMessage;
+      }
     }
 
     _isLoading = false;

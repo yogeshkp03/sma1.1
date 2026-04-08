@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../data/services/cache_service.dart';
 import '../auth/login_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,6 +88,22 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.notifications_outlined,
                 title: 'Notifications',
                 onTap: () {},
+              ),
+              const Divider(),
+              _buildSectionTitle('Data & Storage'),
+              FutureBuilder<CacheService>(
+                future: CacheService.getInstance(),
+                builder: (context, snapshot) {
+                  final cacheService = snapshot.data;
+                  final cacheSize =
+                      cacheService?.getCacheSizeFormatted() ?? '...';
+                  return _ProfileTile(
+                    icon: Icons.delete_outline,
+                    title: 'Clear Cache',
+                    subtitle: 'Current cache: $cacheSize',
+                    onTap: () => _showClearCacheDialog(context),
+                  );
+                },
               ),
               const Divider(),
               _buildSectionTitle('Support'),
@@ -167,16 +189,52 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _showClearCacheDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear Cache'),
+        content: const Text(
+            'This will remove all cached restaurant and menu data. Your preferences and cart items will be kept.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final cacheService = await CacheService.getInstance();
+              await cacheService.clear();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Cache cleared successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                setState(() {});
+              }
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ProfileTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? subtitle;
   final VoidCallback onTap;
 
   const _ProfileTile({
     required this.icon,
     required this.title,
+    this.subtitle,
     required this.onTap,
   });
 
@@ -185,6 +243,10 @@ class _ProfileTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: Colors.grey[700]),
       title: Text(title),
+      subtitle: subtitle != null
+          ? Text(subtitle!,
+              style: TextStyle(fontSize: 12, color: Colors.grey[500]))
+          : null,
       trailing: Icon(Icons.chevron_right, color: Colors.grey[400]),
       onTap: onTap,
     );

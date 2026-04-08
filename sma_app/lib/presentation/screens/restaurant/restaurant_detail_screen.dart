@@ -5,6 +5,7 @@ import '../../../data/models/restaurant_model.dart';
 import '../../../data/models/menu_item_model.dart';
 import '../../../providers/restaurant_provider.dart';
 import '../../../providers/cart_provider.dart';
+import '../../widgets/image_placeholder.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -81,17 +82,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                   ],
                 ),
               ),
-              background: Container(
-                color: AppColors.secondary.withValues(alpha: 0.3),
-                child: widget.restaurant.imageUrl != null
-                    ? Image.network(
-                        widget.restaurant.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildPlaceholder();
-                        },
-                      )
-                    : _buildPlaceholder(),
+              background: CachedImage(
+                url: widget.restaurant.imageUrl,
+                fit: BoxFit.cover,
+                placeholderIcon: Icons.restaurant,
+                backgroundColor: AppColors.secondary,
               ),
             ),
             actions: [
@@ -416,24 +411,17 @@ class _MenuItemCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 80,
               height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: 0.2),
+              width: 80,
+              child: CachedImage(
+                url: item.imageUrl,
+                width: 80,
+                height: 80,
+                placeholderIcon: Icons.fastfood,
+                backgroundColor: AppColors.secondary,
                 borderRadius: BorderRadius.circular(8),
+                fit: BoxFit.cover,
               ),
-              child: item.imageUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        item.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildPlaceholder();
-                        },
-                      ),
-                    )
-                  : _buildPlaceholder(),
             ),
             const SizedBox(width: 12),
             Expanded(

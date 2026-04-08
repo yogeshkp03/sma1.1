@@ -63,6 +63,8 @@ public class MenuItemController {
             @RequestParam(required = false) DietType dietType,
             @RequestParam(required = false) Integer minCalories,
             @RequestParam(required = false) Integer maxCalories,
+            @RequestParam(required = false) BigDecimal maxCarbs,
+            @RequestParam(required = false) BigDecimal maxFat,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) BigDecimal minProtein,
             @RequestParam(defaultValue = "0") int page,
@@ -71,7 +73,7 @@ public class MenuItemController {
         if (page >= 0 && size > 0) {
             Pageable pageable = PageRequest.of(page, size);
             Page<MenuItemResponse> pagedResult = menuItemService.findByFiltersPaginated(
-                location, dietType, minCalories, maxCalories, maxPrice, minProtein, pageable);
+                location, dietType, minCalories, maxCalories, maxCarbs, maxFat, maxPrice, minProtein, pageable);
             
             return ResponseEntity.ok(ApiResponse.success(pagedResult.getContent(), 
                 "page", pagedResult.getNumber(),
@@ -85,7 +87,7 @@ public class MenuItemController {
         if (location != null && !location.isEmpty()) {
             menuItems = menuItemService.getMenuByLocation(location);
         } else {
-            menuItems = menuItemService.findByFilters(dietType, minCalories, maxCalories, maxPrice, minProtein);
+            menuItems = menuItemService.findByFilters(dietType, minCalories, maxCalories, maxCarbs, maxFat, maxPrice, minProtein);
         }
         
         return ResponseEntity.ok(ApiResponse.success(menuItems));

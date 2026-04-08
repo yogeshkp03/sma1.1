@@ -58,3 +58,10 @@ logging:
   level:
     com.smartmeal: INFO
     org.springframework.security: INFO
+
+# Recommendation Engine Configuration
+recommendation:
+  variety-window-days: 7
+  history-weight-days: 30
+  history-decay-rate: 0.9
+  restaurant-affinity-weight: 15

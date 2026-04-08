@@ -5,7 +5,7 @@ import com.smartmeal.model.MenuItem;
 import com.smartmeal.model.SmaPreference;
 import com.smartmeal.model.enums.MealType;
 import com.smartmeal.service.AnalyticsService;
-import com.smartmeal.service.GeminiService;
+import com.smartmeal.service.LocalRecommendationService;
 import com.smartmeal.repository.SmaPreferenceRepository;
 import com.smartmeal.repository.RecommendationHistoryRepository;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +17,16 @@ import java.util.Map;
 @RequestMapping("/api/v1/recommendations")
 public class RecommendationController {
 
-    private final GeminiService geminiService;
+    private final LocalRecommendationService recommendationService;
     private final SmaPreferenceRepository preferenceRepository;
     private final RecommendationHistoryRepository historyRepository;
     private final AnalyticsService analyticsService;
 
-    public RecommendationController(GeminiService geminiService,
+    public RecommendationController(LocalRecommendationService recommendationService,
                                    SmaPreferenceRepository preferenceRepository,
                                    RecommendationHistoryRepository historyRepository,
                                    AnalyticsService analyticsService) {
-        this.geminiService = geminiService;
+        this.recommendationService = recommendationService;
         this.preferenceRepository = preferenceRepository;
         this.historyRepository = historyRepository;
         this.analyticsService = analyticsService;
@@ -38,13 +38,13 @@ public class RecommendationController {
             @RequestParam MealType mealType) {
         
         try {
-            MenuItem recommendation = geminiService.getAiRecommendation(userId, mealType);
+            MenuItem recommendation = recommendationService.getRecommendation(userId, mealType);
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "data", Map.of(
                     "menuItem", recommendation,
                     "mealType", mealType,
-                    "message", "AI-recommended " + mealType.getDisplayName() + " based on your preferences"
+                    "message", "Recommended " + mealType.getDisplayName() + " based on your preferences"
                 )
             ));
         } catch (Exception e) {

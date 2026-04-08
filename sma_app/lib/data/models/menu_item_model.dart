@@ -7,6 +7,7 @@ class MenuItem {
   final double price;
   final String? imageUrl;
   final bool isVeg;
+  final String? dietType;
   final int? calories;
   final double? proteinGrams;
   final double? carbsGrams;
@@ -26,6 +27,7 @@ class MenuItem {
     required this.price,
     this.imageUrl,
     required this.isVeg,
+    this.dietType,
     this.calories,
     this.proteinGrams,
     this.carbsGrams,
@@ -38,6 +40,7 @@ class MenuItem {
   });
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
+    final dietTypeStr = json['dietType']?.toString().toUpperCase();
     return MenuItem(
       id: json['id'] ?? 0,
       restaurantId: json['restaurantId'],
@@ -46,8 +49,8 @@ class MenuItem {
       description: json['description'],
       price: (json['price'] ?? 0).toDouble(),
       imageUrl: json['imageUrl'],
-      isVeg: (json['isVeg'] ??
-          json['dietType']?.toString().toUpperCase() == 'VEG'),
+      isVeg: json['isVeg'] ?? dietTypeStr == 'VEG',
+      dietType: dietTypeStr,
       calories: json['calories'],
       proteinGrams: (json['proteinGrams'] ?? json['protein'] ?? 0).toDouble(),
       carbsGrams: (json['carbsGrams'] ?? json['carbs'] ?? 0).toDouble(),

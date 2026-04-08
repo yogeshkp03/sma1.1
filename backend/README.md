@@ -8,17 +8,38 @@ A Spring Boot backend API for the Smart Meal Autopilot (SMA) food ordering appli
 - Restaurant and menu management
 - Shopping cart functionality
 - Smart Meal Autopilot (SMA) preferences
-- AI-powered meal recommendations (Google Gemini)
+- **Local Recommendation Engine** - Rule-based intelligent recommendations
 - Scheduled automation for meal ordering
 - Delhi NCR restaurant network (50 locations)
+
+### Recommendation Engine
+
+The recommendation engine uses a hybrid scoring algorithm:
+
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Protein goal | +20 | Item meets minimum protein requirement |
+| Calorie match | +15 | Item within calorie range |
+| Macro limits | +10 | Carbs and fat within limits |
+| History recency | +25 | Based on user order history (30 days, 0.9 decay) |
+| Restaurant affinity | +15 | Boost for preferred restaurants |
+| Popularity | +10 | Items ordered by many users |
+| Variety | +20 | Avoids recently recommended items (7 days) |
+| Random | +5 | Small factor for discovery |
+
+**Hard Constraints:**
+- Diet type: EXACT match only (no mixing)
+- Budget: Item price ≤ user maxBudget
+- Min calories: Item calories ≥ user minCalories
+- Max carbs/fat: Within user limits
 
 ## Tech Stack
 
 - Spring Boot 3.3
-- PostgreSQL
+- H2 Database (in-memory, for development)
 - JWT Authentication
-- Google Gemini API
 - Spring Scheduler
+- Local rule-based recommendation engine
 
 ## Setup
 

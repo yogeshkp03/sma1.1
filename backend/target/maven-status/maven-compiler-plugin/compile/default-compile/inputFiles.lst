@@ -37,6 +37,7 @@ D:\sma\backend\src\main\java\com\smartmeal\SmartMealAutopilotApplication.java
 D:\sma\backend\src\main\java\com\smartmeal\service\CartService.java
 D:\sma\backend\src\main\java\com\smartmeal\dto\request\AuthRequest.java
 D:\sma\backend\src\main\java\com\smartmeal\scheduler\SmaScheduler.java
+D:\sma\backend\src\main\java\com\smartmeal\service\LocalRecommendationService.java
 D:\sma\backend\src\main\java\com\smartmeal\dto\request\RegisterRequest.java
 D:\sma\backend\src\main\java\com\smartmeal\dto\response\CartResponse.java
 D:\sma\backend\src\main\java\com\smartmeal\model\enums\OrderStatus.java
@@ -64,7 +65,6 @@ D:\sma\backend\src\main\java\com\smartmeal\config\RequestLoggingInterceptor.java
 D:\sma\backend\src\main\java\com\smartmeal\repository\OrderRepository.java
 D:\sma\backend\src\main\java\com\smartmeal\dto\request\AddressRequest.java
 D:\sma\backend\src\main\java\com\smartmeal\controller\RestaurantController.java
-D:\sma\backend\src\main\java\com\smartmeal\service\GeminiService.java
 D:\sma\backend\src\main\java\com\smartmeal\config\WebSocketConfig.java
 D:\sma\backend\src\main\java\com\smartmeal\controller\SmaPreferenceController.java
 D:\sma\backend\src\main\java\com\smartmeal\dto\request\CartItemRequest.java
