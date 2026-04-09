@@ -23,7 +23,8 @@ public interface SmaPreferenceRepository extends JpaRepository<SmaPreference, Lo
     
     Optional<SmaPreference> findByIdAndUserId(Long id, Long userId);
     
-    Optional<SmaPreference> findByUserIdAndMealType(Long userId, MealType mealType);
+    @Query("SELECT s FROM SmaPreference s WHERE s.user.id = :userId AND s.mealType = :mealType")
+    List<SmaPreference> findByUserIdAndMealType(@Param("userId") Long userId, @Param("mealType") MealType mealType);
     
     @Query("SELECT s FROM SmaPreference s WHERE s.isActive = true AND " +
            "s.expiresAt > :currentTime AND " +

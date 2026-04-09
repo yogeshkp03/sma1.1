@@ -44,15 +44,18 @@ public class LocalRecommendationService {
     }
 
     public MenuItem getRecommendation(Long userId, MealType mealType) {
-        Optional<SmaPreference> prefOpt = smaPreferenceRepository.findByUserIdAndMealType(userId, mealType);
+        List<SmaPreference> preferences = smaPreferenceRepository.findByUserIdAndMealType(userId, mealType);
 
-        if (prefOpt.isEmpty()) {
+        if (preferences.isEmpty()) {
             return getFallbackRecommendation(userId, mealType);
         }
 
-        SmaPreference pref = prefOpt.get();
+        SmaPreference pref = preferences.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
+                .findFirst()
+                .orElse(preferences.get(0));
 
-        List<MenuItem> allItems = menuItemRepository.findAll();
+        List<MenuItem> allItems = menuItemRepository.findAllWithRestaurant();
 
         List<MenuItem> filtered = filterByHardConstraints(allItems, pref);
 
@@ -85,6 +88,91 @@ public class LocalRecommendationService {
 
         return best;
     }
+    
+    public List<MenuItem> getTopNRecommendations(Long userId, MealType mealType, int count) {
+        List<SmaPreference> preferences = smaPreferenceRepository.findByUserIdAndMealType(userId, mealType);
+        
+        if (preferences.isEmpty()) {
+            return getNFallbackRecommendations(userId, mealType, count);
+        }
+        
+        SmaPreference pref = preferences.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
+                .findFirst()
+                .orElse(preferences.get(0));
+        
+        List<MenuItem> allItems = menuItemRepository.findAllWithRestaurant();
+        List<MenuItem> filtered = filterByHardConstraints(allItems, pref);
+        
+        if (filtered.isEmpty()) {
+            return getNFallbackRecommendations(userId, mealType, count);
+        }
+        
+        List<RecommendationHistory> recentHistory = getRecentHistory(userId, HISTORY_WEIGHT_DAYS);
+        Map<Long, Double> menuItemScores = getPopularityScores();
+        Map<Long, Long> restaurantOrderCounts = calculateRestaurantAffinity(userId);
+        Set<Long> recentItemIds = getRecentItemIds(userId, VARIETY_WINDOW_DAYS);
+        Set<Long> preferredRestaurantIds = getPreferredRestaurantIds(restaurantOrderCounts);
+        
+        // Score all items and sort by score descending
+        List<ScoredItem> scoredItems = new ArrayList<>();
+        Set<Long> addedItemIds = new HashSet<>();
+        
+        for (MenuItem item : filtered) {
+            if (addedItemIds.contains(item.getId())) {
+                continue;
+            }
+            double score = calculateScore(item, pref, recentHistory, menuItemScores, 
+                                        restaurantOrderCounts, preferredRestaurantIds, recentItemIds);
+            scoredItems.add(new ScoredItem(item, score));
+            addedItemIds.add(item.getId());
+        }
+        
+        // Sort by score and take top N
+        scoredItems.sort((a, b) -> Double.compare(b.score, a.score));
+        
+        List<MenuItem> topItems = scoredItems.stream()
+                .limit(count)
+                .map(ScoredItem::getItem)
+                .collect(Collectors.toList());
+        
+        // Save history for all top items
+        for (MenuItem item : topItems) {
+            saveRecommendationHistory(userId, item, mealType);
+        }
+        
+        return topItems;
+    }
+    
+    private List<MenuItem> getNFallbackRecommendations(Long userId, MealType mealType, int count) {
+        List<MenuItem> allItems = menuItemRepository.findAllWithRestaurant();
+        
+        // Simple randomization for fallback
+        Collections.shuffle(allItems);
+        
+        List<MenuItem> fallbackItems = allItems.stream()
+                .limit(count)
+                .collect(Collectors.toList());
+        
+        for (MenuItem item : fallbackItems) {
+            saveRecommendationHistory(userId, item, mealType);
+        }
+        
+        return fallbackItems;
+    }
+    
+    private static class ScoredItem {
+        private final MenuItem item;
+        private final double score;
+        
+        ScoredItem(MenuItem item, double score) {
+            this.item = item;
+            this.score = score;
+        }
+        
+        MenuItem getItem() { return item; }
+        double getScore() { return score; }
+    }
 
     private List<MenuItem> filterByHardConstraints(List<MenuItem> items, SmaPreference pref) {
         DietType dietType = pref.getDietType();
@@ -92,7 +180,7 @@ public class LocalRecommendationService {
 
         return items.stream()
             .filter(item -> item.getIsAvailable() == null || item.getIsAvailable())
-            .filter(item -> item.getDietType() == dietType)
+            .filter(item -> isDietTypeCompatible(item.getDietType(), dietType))
             .filter(item -> maxBudget == null || 
                           (item.getPrice() != null && item.getPrice().compareTo(maxBudget) <= 0))
             .filter(item -> pref.getMinCalories() == null || 
@@ -104,6 +192,25 @@ public class LocalRecommendationService {
             .filter(item -> pref.getMaxFat() == null || 
                           (item.getFatGrams() == null || item.getFatGrams().compareTo(pref.getMaxFat()) <= 0))
             .collect(Collectors.toList());
+    }
+
+    private boolean isDietTypeCompatible(DietType itemDietType, DietType preferredDietType) {
+        // If no diet restriction, include all items
+        if (preferredDietType == DietType.NONE) {
+            return true;
+        }
+        
+        // Exact match
+        if (itemDietType == preferredDietType) {
+            return true;
+        }
+        
+        // Vegetarian includes vegan items (vegan is stricter)
+        if (preferredDietType == DietType.VEG && itemDietType == DietType.VEGAN) {
+            return true;
+        }
+        
+        return false;
     }
 
     private double calculateScore(MenuItem item, SmaPreference pref, 

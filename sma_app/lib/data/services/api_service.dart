@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/api_constants.dart';
 
 class ApiService {
-  static const Duration _timeout = Duration(seconds: 10);
+  static const Duration _timeout = Duration(seconds: 30);
   String? _authToken;
 
   ApiService();
@@ -115,10 +114,27 @@ class ApiService {
   Map<String, dynamic> _parseResponse(http.Response response) {
     if (response.body.isEmpty) {
       return {
-        'success': response.statusCode >= 200 && response.statusCode < 300
+        'success': response.statusCode >= 200 && response.statusCode < 300,
+        'statusCode': response.statusCode,
       };
     }
-    return jsonDecode(response.body) as Map<String, dynamic>;
+
+    final Map<String, dynamic> body =
+        jsonDecode(response.body) as Map<String, dynamic>;
+
+    // Override success based on HTTP status code if body doesn't have it
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      body['success'] = body['success'] ?? true;
+      body['statusCode'] = response.statusCode;
+    } else {
+      body['success'] = body['success'] ?? false;
+      body['statusCode'] = response.statusCode;
+      if (body['message'] == null) {
+        body['message'] = 'Request failed with status ${response.statusCode}';
+      }
+    }
+
+    return body;
   }
 }
 

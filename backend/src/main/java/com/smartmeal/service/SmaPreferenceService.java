@@ -162,8 +162,11 @@ public class SmaPreferenceService {
     
     @Transactional
     public void skipScheduledMeal(Long userId, MealType mealType, String reason) {
-        SmaPreference preference = smaPreferenceRepository.findByUserIdAndMealType(userId, mealType)
-                .orElse(null);
+        List<SmaPreference> preferences = smaPreferenceRepository.findByUserIdAndMealType(userId, mealType);
+        SmaPreference preference = preferences.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
+                .findFirst()
+                .orElse(preferences.isEmpty() ? null : preferences.get(0));
         
         if (preference != null) {
             preference.setLastTriggeredAt(LocalDateTime.now().plusHours(24));
@@ -173,8 +176,11 @@ public class SmaPreferenceService {
     
     @Transactional
     public void postponeMeal(Long userId, MealType mealType, int minutes) {
-        SmaPreference preference = smaPreferenceRepository.findByUserIdAndMealType(userId, mealType)
-                .orElse(null);
+        List<SmaPreference> preferences = smaPreferenceRepository.findByUserIdAndMealType(userId, mealType);
+        SmaPreference preference = preferences.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
+                .findFirst()
+                .orElse(preferences.isEmpty() ? null : preferences.get(0));
         
         if (preference != null) {
             preference.setLastTriggeredAt(LocalDateTime.now().plusMinutes(minutes));

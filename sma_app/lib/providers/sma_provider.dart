@@ -11,7 +11,7 @@ class SmaProvider extends ChangeNotifier {
       rec.RecommendationService();
 
   List<SmaPreference> _preferencesList = [];
-  final List<rec.RecommendationHistory> _history = [];
+  final List<RecommendationHistory> _history = [];
   bool _isLoading = false;
   String? _error;
   int? _userId;
@@ -19,7 +19,7 @@ class SmaProvider extends ChangeNotifier {
   SmaPreference? get preferences =>
       _preferencesList.isNotEmpty ? _preferencesList.first : null;
   List<SmaPreference> get preferencesList => _preferencesList;
-  List<rec.RecommendationHistory> get history => _history;
+  List<RecommendationHistory> get history => _history;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -229,19 +229,15 @@ class SmaProvider extends ChangeNotifier {
         scheduledTime: dinnerTime,
       );
 
-      debugPrint('Creating breakfast preference with time: $breakfastTime...');
-      final savedBreakfast =
-          await _repository.createPreference(_userId!, breakfastPref);
+      debugPrint('Creating all meal preferences in parallel...');
 
-      debugPrint('Creating lunch preference with time: $lunchTime...');
-      final savedLunch =
-          await _repository.createPreference(_userId!, lunchPref);
+      final results = await Future.wait([
+        _repository.createPreference(_userId!, breakfastPref),
+        _repository.createPreference(_userId!, lunchPref),
+        _repository.createPreference(_userId!, dinnerPref),
+      ]);
 
-      debugPrint('Creating dinner preference with time: $dinnerTime...');
-      final savedDinner =
-          await _repository.createPreference(_userId!, dinnerPref);
-
-      _preferencesList = [savedBreakfast, savedLunch, savedDinner];
+      _preferencesList = results;
       debugPrint(
           'All preferences saved. List size: ${_preferencesList.length}');
     } catch (e) {

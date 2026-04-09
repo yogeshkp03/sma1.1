@@ -36,17 +36,13 @@ class _SmaHomeScreenState extends State<SmaHomeScreen> {
     final hour = now.hour;
 
     setState(() {
-      if (hour >= 7 && hour < 10) {
+      if (hour >= 7 && hour < 11) {
         _upcomingMeal = MealType.breakfast;
-      } else if (hour >= 10 && hour < 12) {
+      } else if (hour >= 11 && hour < 15) {
         _upcomingMeal = MealType.lunch;
-      } else if (hour >= 12 && hour < 14) {
-        _upcomingMeal = MealType.lunch;
-      } else if (hour >= 14 && hour < 17) {
+      } else if (hour >= 15 && hour < 18) {
         _upcomingMeal = MealType.snacks;
-      } else if (hour >= 17 && hour < 19) {
-        _upcomingMeal = MealType.dinner;
-      } else if (hour >= 19 && hour < 22) {
+      } else if (hour >= 18 && hour < 22) {
         _upcomingMeal = MealType.dinner;
       } else {
         _upcomingMeal = MealType.breakfast;
@@ -993,7 +989,7 @@ class _SmaSetupScreenState extends State<SmaSetupScreen> {
         // Reload preferences from backend to ensure consistency
         // Force refresh to bypass cache
         await smaProvider.loadPreferences(forceRefresh: true);
-        if (context.mounted) {
+        if (mounted) {
           Navigator.pop(context); // Go back to dashboard
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Preferences saved successfully!'),

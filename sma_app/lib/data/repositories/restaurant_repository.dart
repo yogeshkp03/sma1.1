@@ -9,7 +9,7 @@ class RestaurantRepository {
   final ApiService _apiService = ApiService();
   CacheService? _cache;
   bool _cacheEnabled = true;
-  Duration _cacheTtl = const Duration(hours: 24);
+  final Duration _cacheTtl = const Duration(hours: 24);
   bool _cacheInitialized = false;
 
   static const String _restaurantsKey = 'restaurants';

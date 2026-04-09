@@ -129,6 +129,19 @@ class RecommendationHistory {
     this.calories,
     required this.recommendedAt,
   });
+
+  factory RecommendationHistory.fromJson(Map<String, dynamic> json) {
+    return RecommendationHistory(
+      id: json['id'] ?? 0,
+      menuItemName: json['menuItemName'] ?? '',
+      restaurantName: json['restaurantName'] ?? '',
+      mealType: json['mealType'] ?? '',
+      calories: json['calories'],
+      recommendedAt: json['recommendedAt'] != null
+          ? DateTime.parse(json['recommendedAt'])
+          : DateTime.now(),
+    );
+  }
 }
 
 class SmaPreference {

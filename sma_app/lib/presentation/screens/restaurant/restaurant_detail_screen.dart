@@ -410,7 +410,7 @@ class _MenuItemCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            SizedBox(
               height: 80,
               width: 80,
               child: CachedImage(

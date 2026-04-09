@@ -58,11 +58,12 @@ public class MenuItemService {
     public MenuItemResponse getMenuItemById(Long id) {
         return menuItemRepository.findById(id)
                 .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
     }
     
     public MenuItem getMenuItemEntityById(Long id) {
-        return menuItemRepository.findById(id).orElse(null);
+        return menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
     }
     
     public List<MenuItemResponse> getMenuByLocation(String location) {

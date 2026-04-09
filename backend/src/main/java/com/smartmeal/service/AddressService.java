@@ -62,7 +62,9 @@ public class AddressService {
     
     @Transactional
     public void deleteAddress(Long id, Long userId) {
-        addressRepository.deleteById(id);
+        Address address = addressRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new RuntimeException("Address not found or access denied"));
+        addressRepository.delete(address);
     }
     
     public Address getAddressEntityById(Long id) {

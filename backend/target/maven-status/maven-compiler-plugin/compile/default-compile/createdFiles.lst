@@ -52,6 +52,7 @@ com\smartmeal\dto\response\SmaPreferenceResponse.class
 com\smartmeal\dto\response\OrderItemResponse.class
 com\smartmeal\model\OrderItem$OrderItemBuilder.class
 com\smartmeal\controller\SmaController.class
+com\smartmeal\service\LocalRecommendationService$ScoredItem.class
 com\smartmeal\dto\request\CheckoutRequest.class
 com\smartmeal\controller\AuthController.class
 com\smartmeal\dto\response\MenuItemResponse$MenuItemResponseBuilder.class

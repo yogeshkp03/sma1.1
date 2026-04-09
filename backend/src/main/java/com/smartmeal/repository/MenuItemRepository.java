@@ -15,25 +15,28 @@ import java.util.List;
 @Repository
 public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
     
+    @Query("SELECT DISTINCT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.isAvailable = true OR m.isAvailable IS NULL")
+    List<MenuItem> findAllWithRestaurant();
+    
     List<MenuItem> findByRestaurant(Restaurant restaurant);
     
     List<MenuItem> findByRestaurantAndIsAvailableTrue(Restaurant restaurant);
     
     List<MenuItem> findByDietType(DietType dietType);
     
-    @Query("SELECT m FROM MenuItem m WHERE m.restaurant.id = :restaurantId AND m.isAvailable = true")
+    @Query("SELECT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.restaurant.id = :restaurantId AND m.isAvailable = true")
     List<MenuItem> findAvailableByRestaurantId(@Param("restaurantId") Long restaurantId);
     
-    @Query("SELECT m FROM MenuItem m WHERE m.restaurant.id = :restaurantId AND m.isAvailable = true")
+    @Query("SELECT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.restaurant.id = :restaurantId AND m.isAvailable = true")
     Page<MenuItem> findAvailableByRestaurantId(@Param("restaurantId") Long restaurantId, Pageable pageable);
     
-    @Query("SELECT m FROM MenuItem m WHERE m.restaurant.id = :restaurantId AND m.category = :category AND m.isAvailable = true")
+    @Query("SELECT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.restaurant.id = :restaurantId AND m.category = :category AND m.isAvailable = true")
     List<MenuItem> findByRestaurantIdAndCategory(@Param("restaurantId") Long restaurantId, @Param("category") String category);
     
-    @Query("SELECT m FROM MenuItem m WHERE m.restaurant.id = :restaurantId AND m.category = :category AND m.isAvailable = true")
+    @Query("SELECT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.restaurant.id = :restaurantId AND m.category = :category AND m.isAvailable = true")
     Page<MenuItem> findByRestaurantIdAndCategory(@Param("restaurantId") Long restaurantId, @Param("category") String category, Pageable pageable);
     
-    @Query("SELECT m FROM MenuItem m WHERE m.isAvailable = true AND " +
+    @Query("SELECT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.isAvailable = true AND " +
            "(:dietType IS NULL OR m.dietType = :dietType) AND " +
            "(:minCalories IS NULL OR m.calories >= :minCalories) AND " +
            "(:maxCalories IS NULL OR m.calories <= :maxCalories) AND " +
@@ -49,7 +52,7 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
                                    @Param("maxPrice") BigDecimal maxPrice,
                                    @Param("minProtein") BigDecimal minProtein);
     
-    @Query("SELECT m FROM MenuItem m WHERE m.isAvailable = true AND " +
+    @Query("SELECT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.isAvailable = true AND " +
            "(:location IS NULL OR m.restaurant.location = :location) AND " +
            "(:dietType IS NULL OR m.dietType = :dietType) AND " +
            "(:minCalories IS NULL OR m.calories >= :minCalories) AND " +
@@ -68,6 +71,6 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
                                    @Param("minProtein") BigDecimal minProtein,
                                    Pageable pageable);
     
-    @Query("SELECT m FROM MenuItem m WHERE m.restaurant.location = :location AND m.isAvailable = true")
+    @Query("SELECT m FROM MenuItem m JOIN FETCH m.restaurant WHERE m.restaurant.location = :location AND m.isAvailable = true")
     List<MenuItem> findByLocation(@Param("location") String location);
 }

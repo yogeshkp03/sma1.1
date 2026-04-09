@@ -54,6 +54,34 @@ public class RecommendationController {
             ));
         }
     }
+    
+    @GetMapping("/meal/batch")
+    public ResponseEntity<?> getMealRecommendations(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam MealType mealType,
+            @RequestParam(defaultValue = "5") int count) {
+        
+        try {
+            if (count < 1) count = 1;
+            if (count > 10) count = 10;
+            
+            List<MenuItem> recommendations = recommendationService.getTopNRecommendations(userId, mealType, count);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "data", Map.of(
+                    "recommendations", recommendations,
+                    "mealType", mealType,
+                    "count", recommendations.size(),
+                    "message", "Found " + recommendations.size() + " recommendations for " + mealType.getDisplayName()
+                )
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        }
+    }
 
     @GetMapping("/history")
     public ResponseEntity<?> getHistory(@RequestHeader("X-User-Id") Long userId) {

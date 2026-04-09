@@ -46,11 +46,12 @@ public class RestaurantService {
     public RestaurantResponse getRestaurantById(Long id) {
         return restaurantRepository.findById(id)
                 .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
     }
     
     public Restaurant getRestaurantEntityById(Long id) {
-        return restaurantRepository.findById(id).orElse(null);
+        return restaurantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
     }
     
     public List<RestaurantResponse> searchRestaurants(String keyword, String location) {
